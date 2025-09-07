@@ -1,0 +1,12 @@
+{
+    "files.associations": {
+        "*.cpp": "cpp",
+        "system_error": "cpp",
+        "xlocale": "cpp",
+        "ostream": "cpp",
+        "optional": "cpp",
+        "iosfwd": "cpp",
+        "utility": "cpp",
+        "xstring": "cpp"
+    }
+}
