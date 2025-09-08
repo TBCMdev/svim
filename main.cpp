@@ -24,11 +24,12 @@ int main(int argc, char** argv)
     s_widget fileEditor({0, 0}, windowDimensions.first, windowDimensions.second);
 
     fileEditor.filler = '-';
+    fileEditor.backgroundColor = {255, 0, 0};
 
     while(1)
     {
         gapi::clear();
-
+        gapi::refresh();
         // poll events
 
         // clear
@@ -36,6 +37,8 @@ int main(int argc, char** argv)
         // draw
 
         gapi::drawWidget(fileEditor);
+
+        gapi::render();
 
     }
 

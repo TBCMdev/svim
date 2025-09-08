@@ -1,3 +1,3 @@
-C:/Users/krist/Desktop/code/svim/build/CMakeFiles/svim.dir
-C:/Users/krist/Desktop/code/svim/build/CMakeFiles/ALL_BUILD.dir
-C:/Users/krist/Desktop/code/svim/build/CMakeFiles/ZERO_CHECK.dir
+C:/Users/krist/OneDrive/Desktop/School/coding/svim/build/CMakeFiles/svim.dir
+C:/Users/krist/OneDrive/Desktop/School/coding/svim/build/CMakeFiles/ALL_BUILD.dir
+C:/Users/krist/OneDrive/Desktop/School/coding/svim/build/CMakeFiles/ZERO_CHECK.dir
