@@ -1,6 +1,6 @@
-^C:\USERS\KRIST\ONEDRIVE\DESKTOP\SCHOOL\CODING\SVIM\CMAKELISTS.TXT
+^C:\USERS\KRIST\DESKTOP\CODE\SVIM\CMAKELISTS.TXT
 setlocal
-"C:\Program Files\CMake\bin\cmake.exe" -SC:/Users/krist/OneDrive/Desktop/School/coding/svim -BC:/Users/krist/OneDrive/Desktop/School/coding/svim/build --check-stamp-file C:/Users/krist/OneDrive/Desktop/School/coding/svim/build/CMakeFiles/generate.stamp
+"C:\Program Files\CMake\bin\cmake.exe" -SC:/Users/krist/Desktop/code/svim -BC:/Users/krist/Desktop/code/svim/build --check-stamp-file C:/Users/krist/Desktop/code/svim/build/CMakeFiles/generate.stamp
 if %errorlevel% neq 0 goto :cmEnd
 :cmEnd
 endlocal & call :cmErrorLevel %errorlevel% & goto :cmDone

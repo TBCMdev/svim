@@ -1,35 +1,35 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="17.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
-    <ClCompile Include="C:\Users\krist\OneDrive\Desktop\School\coding\svim\main.cpp" />
-    <ClCompile Include="C:\Users\krist\OneDrive\Desktop\School\coding\svim\src\graphics\api\api.cpp">
+    <ClCompile Include="C:\Users\krist\Desktop\code\svim\main.cpp" />
+    <ClCompile Include="C:\Users\krist\Desktop\code\svim\src\graphics\api\api.cpp">
       <Filter>src\graphics\api</Filter>
     </ClCompile>
-    <ClCompile Include="C:\Users\krist\OneDrive\Desktop\School\coding\svim\src\graphics\widget.cpp">
+    <ClCompile Include="C:\Users\krist\Desktop\code\svim\src\graphics\widget.cpp">
       <Filter>src\graphics</Filter>
     </ClCompile>
-    <ClCompile Include="C:\Users\krist\OneDrive\Desktop\School\coding\svim\src\util\color.cpp">
+    <ClCompile Include="C:\Users\krist\Desktop\code\svim\src\util\color.cpp">
       <Filter>src\util</Filter>
     </ClCompile>
-    <ClCompile Include="C:\Users\krist\OneDrive\Desktop\School\coding\svim\src\util\file.cpp">
+    <ClCompile Include="C:\Users\krist\Desktop\code\svim\src\util\file.cpp">
       <Filter>src\util</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <CustomBuild Include="C:\Users\krist\OneDrive\Desktop\School\coding\svim\CMakeLists.txt" />
+    <CustomBuild Include="C:\Users\krist\Desktop\code\svim\CMakeLists.txt" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="src">
-      <UniqueIdentifier>{BC50CE02-C72B-3D9C-86CC-24321A867D41}</UniqueIdentifier>
+      <UniqueIdentifier>{ABC8C5FC-9CD5-31D5-96CC-590E3575AD20}</UniqueIdentifier>
     </Filter>
     <Filter Include="src\graphics">
-      <UniqueIdentifier>{FE609F14-FED4-3D83-9989-BC420F00D67C}</UniqueIdentifier>
+      <UniqueIdentifier>{CAA0D5C1-58A4-3DCA-A19C-8DA6F74113AA}</UniqueIdentifier>
     </Filter>
     <Filter Include="src\graphics\api">
-      <UniqueIdentifier>{19B8343D-1CEA-325F-A166-09BADF20AEB7}</UniqueIdentifier>
+      <UniqueIdentifier>{F5FAB854-CD6A-3491-A2B1-E7E3A8DEE25C}</UniqueIdentifier>
     </Filter>
     <Filter Include="src\util">
-      <UniqueIdentifier>{15881763-4FD3-3F6D-B294-BF4438FB4EFB}</UniqueIdentifier>
+      <UniqueIdentifier>{8B49B5C0-8C47-3884-9EDD-94A11DD82B76}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
 </Project>

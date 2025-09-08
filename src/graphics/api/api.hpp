@@ -10,6 +10,7 @@
 
 #include "../widget.hpp"
 
+#define CURSOR_HOME_ESC "\x1b[H"
 namespace gapi
 {
     UNIVERSAL struct screen_color_data
@@ -26,27 +27,50 @@ namespace gapi
             CHAR   AsciiChar;
         } character;
     };
-    UNIVERSAL
+    inline bool                          _g_RUNNING = true;
     inline std::vector<screen_char_data> _g_cbuffer;
+
+
 #ifdef _WIN32
     // windows globals
     inline HANDLE                        _g_stdhwnd;
+    inline HANDLE                        _g_stdhwndi;
     inline HWND                          _g_chwnd;
     inline DWORD                         _g_cmode;
+    inline DWORD                         _g_cmodei;
     inline HDC                           _g_hdc;
     inline CONSOLE_SCREEN_BUFFER_INFO    _g_cinfo;
+    inline CONSOLE_CURSOR_INFO           _g_cursor;
 
+    inline DWORD                         _g_origcmode;
+    inline DWORD                         _g_origcmodei;
+    inline CONSOLE_CURSOR_INFO           _g_origcursor;
     
-#define S_CONSOLE_WIDTH _g_cinfo.srWindow.Left - 1
-#define S_CONSOLE_HEIGHT _g_cinfo.srWindow.Top + 1
+#define S_CONSOLE_WIDTH ((_g_cinfo.srWindow.Right - _g_cinfo.srWindow.Left) + (short)1)
+#define S_CONSOLE_HEIGHT ((_g_cinfo.srWindow.Bottom - _g_cinfo.srWindow.Top) + (short)1)
+
+
+#define SET_CURSOR_VISIBILITY(b) gapi::_g_cursor.bVisible = b;
+
 #endif
 
     DWORD                         clear();
     DWORD                         refresh();
 
     DWORD                         setup();
-    std::pair<int, int>           getWindowDimensions();
+    std::pair<short, short>           getWindowDimensions();
 
     void                          drawWidget(const s_widget& widget);
     void                          render();
+
+    namespace internal
+    {
+        BOOL WINAPI _i_consoleHandler(DWORD signal);
+    }
+
+    namespace util
+    {
+        void writeCursorConfig();
+        void restoreConsole();
+    }
 }

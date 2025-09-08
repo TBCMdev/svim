@@ -1,6 +1,6 @@
-^C:\USERS\KRIST\ONEDRIVE\DESKTOP\SCHOOL\CODING\SVIM\BUILD\CMAKEFILES\7D4BEEF528C7316B7A129064E645BF35\GENERATE.STAMP.RULE
+^C:\USERS\KRIST\DESKTOP\CODE\SVIM\BUILD\CMAKEFILES\D62981438CEC2AA71D7C29F2060087E9\GENERATE.STAMP.RULE
 setlocal
-"C:\Program Files\CMake\bin\cmake.exe" -SC:/Users/krist/OneDrive/Desktop/School/coding/svim -BC:/Users/krist/OneDrive/Desktop/School/coding/svim/build --check-stamp-list CMakeFiles/generate.stamp.list --vs-solution-file C:/Users/krist/OneDrive/Desktop/School/coding/svim/build/svim.sln
+"C:\Program Files\CMake\bin\cmake.exe" -SC:/Users/krist/Desktop/code/svim -BC:/Users/krist/Desktop/code/svim/build --check-stamp-list CMakeFiles/generate.stamp.list --vs-solution-file C:/Users/krist/Desktop/code/svim/build/svim.sln
 if %errorlevel% neq 0 goto :cmEnd
 :cmEnd
 endlocal & call :cmErrorLevel %errorlevel% & goto :cmDone

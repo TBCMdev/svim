@@ -2,11 +2,45 @@
 
 namespace gapi
 {
+    namespace internal
+    {
+        BOOL WINAPI _i_consoleHandler(DWORD signal)
+        {
+            switch(signal)
+            {
+                case CTRL_C_EVENT:
+                case CTRL_BREAK_EVENT:
+                    _g_RUNNING = false;
+                    return TRUE;
+                default:
+                    return FALSE;
+            }
+        }        
+    }
+    namespace util
+    {
+        
+        void writeCursorConfig()
+        {
+            SetConsoleCursorInfo(_g_stdhwnd, &_g_cursor);
+        }
+        void restoreConsole()
+        {
+            // Restore console mode
+            SetConsoleMode(_g_stdhwnd, _g_origcmode);
+            SetConsoleMode(_g_stdhwndi, _g_origcmodei);
+            // Restore cursor visibility
+            SetConsoleCursorInfo(_g_stdhwnd, &_g_origcursor);
 
-    std::pair<int, int> getWindowDimensions()
+            // Reset colors and move cursor home
+            std::cout << "\x1b[0m" << "\x1b[H";  // move cursor to top-left
+        }
+
+    }
+    std::pair<short, short> getWindowDimensions()
     {
 #ifdef _WIN32
-        return {S_CONSOLE_WIDTH, S_CONSOLE_HEIGHT};
+        return {(short)S_CONSOLE_WIDTH, (short)S_CONSOLE_HEIGHT};
 #else
         return {0, 0};
 #endif
@@ -16,18 +50,32 @@ namespace gapi
     {
 #ifdef _WIN32
         
-        _g_chwnd   = GetConsoleWindow();
-        _g_hdc     = GetDC(_g_chwnd);
-        _g_stdhwnd = GetStdHandle(STD_OUTPUT_HANDLE);
-        _g_cmode   = GetConsoleMode(_g_stdhwnd, &_g_cmode);
+        _g_chwnd    = GetConsoleWindow();
+        _g_hdc      = GetDC(_g_chwnd);
+        _g_stdhwnd  = GetStdHandle(STD_OUTPUT_HANDLE);
+        _g_stdhwndi = GetStdHandle(STD_INPUT_HANDLE);
+        _g_cmode    = GetConsoleMode(_g_stdhwnd, &_g_cmode);
+        _g_cmodei   = GetConsoleMode(_g_stdhwndi, &_g_cmodei);
+        
+        
 
+        GetConsoleCursorInfo(_g_stdhwnd, &_g_cursor);
         // enable virtual processing (color support)
 
+        _g_origcmode  = _g_cmode;
+        _g_origcmodei = _g_cmodei;
+        _g_origcursor = _g_cursor;
         DWORD copiedMode = _g_cmode;
+
         copiedMode |= ENABLE_VIRTUAL_TERMINAL_PROCESSING;
 
-        // Try to set the mode.
         if (!SetConsoleMode(_g_stdhwnd, copiedMode))
+            return ::GetLastError();
+
+        DWORD copiedModeI = _g_cmodei | ENABLE_EXTENDED_FLAGS;
+        copiedModeI      &= ~ENABLE_QUICK_EDIT_MODE;
+        
+        if (!SetConsoleMode(_g_stdhwndi, copiedModeI))
             return ::GetLastError();
 
         DWORD error = refresh();
@@ -35,7 +83,16 @@ namespace gapi
             return error;
         
         auto dimensions = getWindowDimensions();
-        _g_cbuffer.reserve((size_t)(dimensions.first * dimensions.second));
+        _g_cbuffer.resize((size_t)(dimensions.first * dimensions.second));
+
+
+        if (!SetConsoleCtrlHandler(internal::_i_consoleHandler, TRUE))
+        {
+            std::cerr << "Error: could not set control handler.\n";
+            return EXIT_FAILURE;
+        }
+
+
 
 #else
         
@@ -46,8 +103,24 @@ namespace gapi
     DWORD refresh()
     {
 #ifdef _WIN32
-        // [TODO]: no error checks
         GetConsoleScreenBufferInfo(_g_stdhwnd, &_g_cinfo);
+
+        auto size   = getWindowDimensions();
+        _g_cbuffer.resize(size.first * size.second);
+
+        COORD newBuffer = {
+            (SHORT) max(_g_cinfo.dwSize.X, size.first),
+            (SHORT) max(_g_cinfo.dwSize.Y, size.second)
+        };
+        SetConsoleScreenBufferSize(_g_stdhwnd, newBuffer);
+
+
+        SMALL_RECT windowRect = { 0, 0, size.first - 1, size.second - 1 };
+        SetConsoleWindowInfo(_g_stdhwnd, TRUE, &windowRect);
+        // [TODO]: no error checks
+
+        SetConsoleCursorPosition(_g_stdhwnd, {0, 0});
+
 #else
         
 #endif
@@ -77,6 +150,7 @@ namespace gapi
 #ifdef _WIN32
         RECT rect{widget.pos.x, widget.pos.y, widget.pos.x + widget.width, widget.pos.y + widget.height};
         const std::string widgetStr = widget.drawContents();
+        const size_t widgetContentLength = widgetStr.length();
         // DrawTextA(_g_hdc, widgetStr.c_str(), (int)widgetStr.length(), &rect, widget.anchor);
 
         // fix...
@@ -86,9 +160,11 @@ namespace gapi
             for(size_t j = widget.pos.x; j < min(widget.pos.x + widget.width, S_CONSOLE_WIDTH); j++)
             {
                 screen_char_data& info = _g_cbuffer.at((S_CONSOLE_WIDTH * i) + j);
-
-                info.character.UnicodeChar = widgetStr.at(_At++);
-
+                #ifdef UNICODE_CHAR_DISPLAY
+                    info.character.UnicodeChar = _At < widgetContentLength ? widgetStr.at(_At++) : widget.filler;
+                #else
+                    info.character.AsciiChar   = _At < widgetContentLength ? widgetStr.at(_At++) : widget.filler;
+                #endif
                 info.color_data = std::make_unique<screen_color_data>(widget.foregroundColor, widget.backgroundColor);
             }
         }
@@ -114,21 +190,23 @@ namespace gapi
     }
     void render()
     {
+        std::string buffer;
+        buffer.reserve(_g_cbuffer.size() * 16); // preallocate to reduce reallocations
+
         for (screen_char_data& charData : _g_cbuffer)
         {
-            std::wstring output;
             if (charData.color_data)
             {
                 auto& colorData = *charData.color_data;
-                output = colorData.background.toansii() + colorData.foreground.toansii();
+                buffer += colorData.background.toansii(true);
+                buffer += colorData.foreground.toansii(false);
             }
-            output.push_back(charData.character.UnicodeChar);
-            output += ANSII_RESET_L;
-            DWORD success;
-            WriteConsoleA(_g_stdhwnd, output.c_str(), (DWORD)output.length(), &success, NULL);
-            if (!success) {}
-                // error
+            buffer.push_back(charData.character.AsciiChar);
+            buffer += ANSII_RESET; // reset
         }
+
+        DWORD written;
+        WriteConsoleA(_g_stdhwnd, buffer.c_str(), static_cast<DWORD>(buffer.size()), &written, NULL);
     }
 };
 
