@@ -60,8 +60,12 @@
         "xlocmes": "cpp",
         "xlocmon": "cpp",
         "xloctime": "cpp",
-        "xtree": "cpp"
+        "xtree": "cpp",
+        "chrono": "cpp",
+        "forward_list": "cpp",
+        "iomanip": "cpp",
+        "ratio": "cpp"
     },
-    "C_Cpp.default.cppStandard": "gnu++23",
+    "C_Cpp.default.cppStandard": "c++23",
     "C_Cpp.default.cStandard": "c17"
 }

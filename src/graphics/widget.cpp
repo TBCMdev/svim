@@ -5,7 +5,7 @@
 void s_widget::setLine(size_t line, const std::string& str)
 {
     if (line >= lines.size())
-        lines.resize(line);
+        lines.resize(line + 1);
 
     lines.at(line) = str;
 } 
@@ -17,7 +17,7 @@ std::string s_widget::drawContents()
     for(size_t i = 0; i < lines.size(); i++)
     {
         std::string& line = lines.at(i);
-        if (line.size() != width)
+        if (line.length() != (size_t)width)
             line.resize(width, ' ');
         auto iter = insersions.find(i);
 

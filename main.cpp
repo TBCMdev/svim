@@ -1,11 +1,14 @@
 #include <iostream>
 #include <ctime>
+#include <chrono>
 #include <format>
+
+#include "src/util/animation.hpp"
+#include "src/util/animations.hpp"
 
 #include "src/session.hpp"
 #include "src/graphics/widget.hpp"
 #include "src/util/file.hpp"
-#include "src/util/format.hpp"
 #include "src/graphics/api/api.hpp"
 
 int main(int argc, char** argv)
@@ -16,7 +19,6 @@ int main(int argc, char** argv)
     std::string fileName = argv[1];
 
     auto fileContent = readfile(fileName.c_str());
-
     if(!fileContent)
         return EXIT_FAILURE;
 
@@ -29,7 +31,6 @@ int main(int argc, char** argv)
     s_widget topWidget({0, 0}, windowDimensions.first, 1);
 
 
-    rootWidget.filler = '-';
     rootWidget.backgroundColor = {0, 0, 0};
 
     
@@ -38,53 +39,75 @@ int main(int argc, char** argv)
     gapi::util::writeCursorConfig();
 
     session currentSession;
+    currentSession.sessionBegin = std::chrono::steady_clock::now();
 
-    while(gapi::_g_RUNNING)
+    std::string& realFileContent = *fileContent;
+    size_t lineCount             = std::count(realFileContent.begin(), realFileContent.end(), '\n');
+    currentSession.currentFileInfo = std::make_unique<file_info>(lineCount, realFileContent);
+
+    time(&currentSession.timestamp);
+
+
+    auto _run = [&]() -> void
     {
+        while(gapi::_g_RUNNING)
+        {
 #ifdef _WIN32
-        // ShowScrollBar(gapi::_g_chwnd, SB_BOTH, FALSE);
-        // SetConsoleScreenBufferSize(gapi::_g_stdhwnd, gapi::_g_cinfo.dwSize);
+            // ShowScrollBar(gapi::_g_chwnd, SB_BOTH, FALSE);
+            // SetConsoleScreenBufferSize(gapi::_g_stdhwnd, gapi::_g_cinfo.dwSize);
 
 #endif
 
-        // poll events
+            // poll events
 
 
-        // todo make into write func
-        windowDimensions = gapi::getWindowDimensions();
-        // dynamically resize root widget
-        rootWidget.width  = windowDimensions.first;
-        rootWidget.height = windowDimensions.second;
+            // todo make into write func
+            windowDimensions = gapi::getWindowDimensions();
+            // dynamically resize root widget
+            rootWidget.width  = windowDimensions.first;
+            rootWidget.height = windowDimensions.second;
 
-        ctime(&currentSession.timestamp);
-        currentSession.tm_timestamp = localtime(&currentSession.timestamp);
+            time(&currentSession.timestamp);
+            currentSession.tm_timestamp = localtime(&currentSession.timestamp);
+            auto elapsed = std::chrono::duration_cast<std::chrono::seconds>(std::chrono::steady_clock::now() - currentSession.sessionBegin).count();
 
-        /* WIDGET PREPPING */
-        {
-            std::string line = std::format("{}:{} - {} ({} lines) 00:00:00 session",
-                                      currentSession.tm_timestamp->tm_hour,
-                                      currentSession.tm_timestamp->tm_min,
-                                      fileName,
-                                      0);
-            topWidget.setLine(0, line);
+            currentSession.sessionHours = elapsed / 3600;
+            currentSession.sessionMinutes = (elapsed % 3600) / 60;
+            currentSession.sessionSeconds = elapsed % 60;
+
+            /* WIDGET PREPPING */
+            {
+                std::string line = std::format("{:02}:{:02} - {} ({} lines) {:02}:{:02}:{:02} (stime)",
+                                        currentSession.tm_timestamp->tm_hour,
+                                        currentSession.tm_timestamp->tm_min,
+                                        fileName,
+                                        currentSession.currentFileInfo ? currentSession.currentFileInfo->lineCount : '?',
+                                        currentSession.sessionHours,
+                                        currentSession.sessionMinutes,
+                                        currentSession.sessionSeconds);
+                topWidget.setLine(0, line);
+            }
+            gapi::refresh();
+
+            // draw
+            gapi::drawWidget(rootWidget);
+
+            gapi::drawWidget(topWidget);
+            // render
+            gapi::render();
+
+            // SET_CURSOR_VISIBILITY(true);
+
+            Sleep(8);
+
         }
-        gapi::refresh();
-
-        // draw
-        gapi::drawWidget(rootWidget);
-
-        gapi::drawWidget(topWidget);
-        // render
-        gapi::render();
-
-        // SET_CURSOR_VISIBILITY(true);
-
-        Sleep(8);
-
-    }
-    gapi::util::restoreConsole();
-    // ShowScrollBar(gapi::_g_chwnd, SB_RIGHT, TRUE);
-
-
+        gapi::util::restoreConsole();
+        // ShowScrollBar(gapi::_g_chwnd, SB_RIGHT, TRUE);
+    };
+    
+    animation bootAnim = animations::old_monitor_boot({220, 220, 220});
+    bootAnim.finish = _run;
+    bootAnim.animate(currentSession.timestamp);
+    
     return EXIT_SUCCESS;
 }

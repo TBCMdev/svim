@@ -109,13 +109,12 @@ namespace gapi
         _g_cbuffer.resize(size.first * size.second);
 
         COORD newBuffer = {
-            (SHORT) max(_g_cinfo.dwSize.X, size.first),
-            (SHORT) max(_g_cinfo.dwSize.Y, size.second)
+            (SHORT) std::max(_g_cinfo.dwSize.X, size.first),
+            (SHORT) std::max(_g_cinfo.dwSize.Y, size.second)
         };
         SetConsoleScreenBufferSize(_g_stdhwnd, newBuffer);
 
-
-        SMALL_RECT windowRect = { 0, 0, size.first - 1, size.second - 1 };
+        SMALL_RECT windowRect = { 0, 0, size.first - ((short)1), size.second - ((short)1)};
         SetConsoleWindowInfo(_g_stdhwnd, TRUE, &windowRect);
         // [TODO]: no error checks
 
@@ -148,18 +147,15 @@ namespace gapi
     void drawWidget(s_widget& widget)
     {
 #ifdef _WIN32
-        RECT rect{widget.pos.x, widget.pos.y, widget.pos.x + widget.width, widget.pos.y + widget.height};
         const std::string widgetStr = widget.drawContents();
         const size_t widgetContentLength = widgetStr.length();
-        // DrawTextA(_g_hdc, widgetStr.c_str(), (int)widgetStr.length(), &rect, widget.anchor);
 
-        // fix...
         size_t _At = 0;
-        for(size_t i = widget.pos.y; i < min(widget.pos.y + widget.height, S_CONSOLE_HEIGHT); i++)
+        for(dimension_t i = widget.pos.y; i < std::min(widget.pos.y + widget.height, S_CONSOLE_HEIGHT); i++)
         {
-            for(size_t j = widget.pos.x; j < min(widget.pos.x + widget.width, S_CONSOLE_WIDTH); j++)
+            for(dimension_t j = widget.pos.x; j < std::min(widget.pos.x + widget.width, S_CONSOLE_WIDTH); j++)
             {
-                screen_char_data& info = _g_cbuffer.at((S_CONSOLE_WIDTH * i) + j);
+                screen_char_data& info = _g_cbuffer.at((size_t)((S_CONSOLE_WIDTH * i) + j));
                 #ifdef UNICODE_CHAR_DISPLAY
                     info.character.UnicodeChar = _At < widgetContentLength ? widgetStr.at(_At++) : widget.filler;
                 #else
@@ -188,23 +184,34 @@ namespace gapi
         
 #endif
     }
-    void render()
+    void render(std::vector<gapi::screen_char_data>* externalBufferP = nullptr)
     {
         std::string buffer;
-        buffer.reserve(_g_cbuffer.size() * 16); // preallocate to reduce reallocations
 
-        for (screen_char_data& charData : _g_cbuffer)
+        if (externalBufferP)
         {
-            if (charData.color_data)
-            {
-                auto& colorData = *charData.color_data;
-                buffer += colorData.background.toansii(true);
-                buffer += colorData.foreground.toansii(false);
-            }
-            buffer.push_back(charData.character.AsciiChar);
-            buffer += ANSII_RESET; // reset
-        }
+            auto& externalBuffer = *externalBufferP;
+            buffer.reserve(externalBuffer.size()); // preallocate to reduce reallocations
+            for (screen_char_data& charData : externalBuffer)
+                buffer.push_back(charData.character.AsciiChar);
 
+        }
+        else
+        {
+            buffer.reserve(_g_cbuffer.size() * 16); // preallocate to reduce reallocations
+
+            for (screen_char_data& charData : _g_cbuffer)
+            {
+                if (charData.color_data)
+                {
+                    auto& colorData = *charData.color_data;
+                    buffer += colorData.background.toansii(true);
+                    buffer += colorData.foreground.toansii(false);
+                }
+                buffer.push_back(charData.character.AsciiChar);
+                buffer += ANSII_RESET; // reset
+            }
+        }
         DWORD written;
         WriteConsoleA(_g_stdhwnd, buffer.c_str(), static_cast<DWORD>(buffer.size()), &written, NULL);
     }

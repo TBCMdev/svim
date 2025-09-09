@@ -5,28 +5,18 @@
 #define UNIVERSAL
 
 #ifdef _WIN32
+#define NOMINMAX 1
+
 #include <windows.h>
 #endif
 
 #include "../widget.hpp"
+#include "screen_data.hpp"
 
 #define CURSOR_HOME_ESC "\x1b[H"
 namespace gapi
 {
-    UNIVERSAL struct screen_color_data
-    {
-        color foreground, background;
-
-        screen_color_data(const color& _fg, const color& _bg) : foreground(_fg), background(_bg) {}
-    };
-    UNIVERSAL struct screen_char_data
-    {
-        std::unique_ptr<screen_color_data> color_data;
-        union {
-            WCHAR UnicodeChar;
-            CHAR   AsciiChar;
-        } character;
-    };
+    
     inline bool                          _g_RUNNING = true;
     inline std::vector<screen_char_data> _g_cbuffer;
 

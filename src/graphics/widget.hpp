@@ -18,15 +18,15 @@ struct s_widget_content_inserter
 };
 struct s_widget
 {
-    dimension_t width, height;
     position    pos;
-
+    dimension_t width, height;
+    
+    s_widget_anchor anchor;
     color       backgroundColor = color{255, 0, 0}, foregroundColor = color{255, 255, 255};
     std::unique_ptr<std::vector<s_widget>> children = nullptr;
     
     char        filler     =  ' ';
 
-    s_widget_anchor anchor;
     
     bool        anchored   = false;
     bool        scrollable = false;
