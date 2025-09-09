@@ -60,7 +60,7 @@ namespace gapi
     DWORD                         setup();
     std::pair<short, short>           getWindowDimensions();
 
-    void                          drawWidget(const s_widget& widget);
+    void                          drawWidget(s_widget& widget);
     void                          render();
 
     namespace internal

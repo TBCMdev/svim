@@ -145,7 +145,7 @@ namespace gapi
         return 0;
     }
 
-    void drawWidget(const s_widget& widget)
+    void drawWidget(s_widget& widget)
     {
 #ifdef _WIN32
         RECT rect{widget.pos.x, widget.pos.y, widget.pos.x + widget.width, widget.pos.y + widget.height};
