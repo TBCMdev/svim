@@ -64,7 +64,8 @@
         "chrono": "cpp",
         "forward_list": "cpp",
         "iomanip": "cpp",
-        "ratio": "cpp"
+        "ratio": "cpp",
+        "functional": "cpp"
     },
     "C_Cpp.default.cppStandard": "c++23",
     "C_Cpp.default.cStandard": "c17"
