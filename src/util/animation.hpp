@@ -1,12 +1,16 @@
 #pragma once
 #include <vector>
 #include <functional>
+#include <chrono>
+
+typedef std::chrono::time_point<std::chrono::steady_clock> anim_time;
+
+
 template<typename _AnimT>
 struct keyframe
 {
     size_t when = 0, duration;
-    
-    time_t began = 0;
+    std::chrono::milliseconds speed = 250; // how many updates per second
 };
 // no animation, just holds the val object.
 template<typename _AnimT> 
@@ -19,9 +23,9 @@ template<typename _AnimT>
 struct dynamic_keyframe : public keyframe<_AnimT>
 {
     size_t update_count = 0;
-    bool (*_animate)(_AnimT&) = nullptr;
+    bool (*_animate)(anim_time curr, _AnimT&, std::shared_ptr<dynamic_keyframe<screen_frame_t>>) = nullptr;
 
-    dynamic_keyframe(size_t when, size_t duration, void (*__animFunc)(_AnimT&)) :
+    dynamic_keyframe(anim_time curr, size_t when, size_t duration, void (*__animFunc)(_AnimT&, std::shared_ptr<dynamic_keyframe<screen_frame_t>>)) :
                         keyframe<_AnimT>{when, duration}, _animate(__animFunc)
     { }
 
@@ -45,13 +49,12 @@ public:
 
     _AnimT animatable;
 
-    time_t startTime = 0;
+    anim_time startTime = 0;
 
-    size_t                            currentAnimatingKeyframeID = 0;
+    size_t                            nextKeyframeID = 0;
     std::shared_ptr<keyframe<_AnimT>> currentAnimatingKeyframe   = nullptr;
 
     std::function<void()> finish = nullptr;
-
     animation(const _AnimT& v, bool start = false) : animatable(v)
     {
         if (start)
@@ -60,14 +63,15 @@ public:
     animation()
     { }
 
+    inline bool finished()
+    {
+        return currentAnimatingKeyframe == nullptr;
+    }
+
     inline bool tryAnimate(time_t curr)
     {
         if (startTime != 0 && startTime >= curr)
             animate(curr);
-    }
-    inline void tick()
-    {
-
     }
     void animate(time_t curr);
 

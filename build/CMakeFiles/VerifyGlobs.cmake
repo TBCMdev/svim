@@ -6,7 +6,8 @@ file(GLOB_RECURSE NEW_GLOB LIST_DIRECTORIES false "C:/Users/krist/Desktop/code/s
 set(OLD_GLOB
   "C:/Users/krist/Desktop/code/svim/src/graphics/api/api.cpp"
   "C:/Users/krist/Desktop/code/svim/src/graphics/widget.cpp"
-  "C:/Users/krist/Desktop/code/svim/src/util/animate.cpp"
+  "C:/Users/krist/Desktop/code/svim/src/util/animation.cpp"
+  "C:/Users/krist/Desktop/code/svim/src/util/animations.cpp"
   "C:/Users/krist/Desktop/code/svim/src/util/color.cpp"
   "C:/Users/krist/Desktop/code/svim/src/util/file.cpp"
   )
@@ -39,7 +40,8 @@ endif()
 # PROJECT_SOURCES at CMakeLists.txt:23 (file)
 file(GLOB_RECURSE NEW_GLOB LIST_DIRECTORIES false "C:/Users/krist/Desktop/code/svim/src/util/*.cpp")
 set(OLD_GLOB
-  "C:/Users/krist/Desktop/code/svim/src/util/animate.cpp"
+  "C:/Users/krist/Desktop/code/svim/src/util/animation.cpp"
+  "C:/Users/krist/Desktop/code/svim/src/util/animations.cpp"
   "C:/Users/krist/Desktop/code/svim/src/util/color.cpp"
   "C:/Users/krist/Desktop/code/svim/src/util/file.cpp"
   )

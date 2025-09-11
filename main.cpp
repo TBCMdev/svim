@@ -45,7 +45,6 @@ int main(int argc, char** argv)
     size_t lineCount             = std::count(realFileContent.begin(), realFileContent.end(), '\n');
     currentSession.currentFileInfo = std::make_unique<file_info>(lineCount, realFileContent);
 
-    time(&currentSession.timestamp);
 
 
     auto _run = [&]() -> void
@@ -107,7 +106,12 @@ int main(int argc, char** argv)
     
     animation bootAnim = animations::old_monitor_boot({220, 220, 220});
     bootAnim.finish = _run;
-    bootAnim.animate(currentSession.timestamp);
-    
+
+    while(!bootAnim.finished())
+    {
+        time(&currentSession.timestamp);
+        bootAnim.animate(currentSession.timestamp);
+
+    }
     return EXIT_SUCCESS;
 }
